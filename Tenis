@@ -1,0 +1,149 @@
+#include <iostream>
+#include <conio.h>
+#include <vector>
+
+using namespace std;
+
+bool gameOver = false;
+const int height = 24;
+const int length = 80;
+int i, j, playerY = 12, playerX = 0, enemyY = 12, enemyX = 79, ballX = length / 2 - 1, ballY = height / 2 - 1;
+vector <vector<char> > gameSpace(24, vector<char>(80, ' '));
+int ballEndX = 0, ballEndY = rand() % 23, score = 0;
+enum naprav
+{
+    nothing,
+    up,
+    down
+};
+naprav direct;
+
+void map()
+{
+    system("cls");
+    for (i = 0; i < length; i++)
+        cout << '_';
+    for (i = 0; i < height - 2; i++)
+        for (j = 0; j < length; j++)
+        {
+            cout << gameSpace[i][j];
+        }
+    for (i = 0; i < length; i++)
+        cout << '-';
+    cout << "SCORE:" << score;
+}
+
+void inGame()
+{
+    if (direct == up && playerY - 2 >= 0)
+    {
+        direct = nothing;
+        gameSpace[playerY + 1][playerX] = ' ';
+        gameSpace[playerY - 2][playerX] = '|';
+        playerY--;
+    }
+
+    if (direct == down && playerY + 2 < 22)
+    {
+        direct = nothing;
+        gameSpace[playerY - 1][playerX] = ' ';
+        gameSpace[playerY + 2][playerX] = '|';
+        playerY++;
+    }
+    
+    gameSpace[ballY][ballX] = ' ';
+    if (ballX > ballEndX)
+    {
+        if (ballX != ballEndX)
+            ballX--;
+    }else
+        if (ballX < ballEndX)
+        {
+            if (ballX != ballEndX)
+                ballX++;
+        }
+    if (ballY < ballEndY)
+    {
+        if (ballY != ballEndY)
+            ballY++;
+    }else 
+        if (ballY > ballEndY)
+        {
+            if (ballY != ballEndY)
+                ballY--;
+        }
+        gameSpace[ballY][ballX] = 'o';
+        if ((ballX == playerX && ballY == playerY) || (ballX == playerX && ballY == playerY - 1) || (ballX == playerX && ballY == playerY + 1))
+        {
+            score++;
+            ballEndX = 79;
+            ballEndY = rand() % 23;
+        }else if (ballX == ballEndX && ballY == ballEndY && ((ballX == playerX && ballY != playerY) || (ballX == playerX && ballY != playerY - 1) || (ballX == playerX && ballY != playerY + 1))) gameOver = 1;
+    if (score % 2 != 0)
+    {
+            if (enemyY > ballEndY && enemyY + 1 > ballEndY && enemyY - 1 > ballEndY)
+            {
+                gameSpace[enemyY + 1][enemyX] = ' ';
+                gameSpace[enemyY - 2][enemyX] = '|';
+                enemyY--;
+                //gameSpace[enemyY][enemyX] = '|';
+            }
+            else {
+                if (enemyY < ballEndY && enemyY + 1 < ballEndY && enemyY - 1 < ballEndY)
+                {
+                gameSpace[enemyY - 1][enemyX] = ' ';
+                gameSpace[enemyY + 2][enemyX] = '|';
+                enemyY++;
+                //gameSpace[enemyY][enemyX] = '|';
+                }
+            }
+    }
+    
+    if ((ballX == enemyX && ballY == enemyY) || (ballX == enemyX && ballY == enemyY - 1) || (ballX == enemyX && ballY == enemyY + 1))
+    {
+        score++;
+        ballEndX = 0;
+        ballEndY = rand() % 23;
+    }
+}
+
+void control()
+{
+    if (_kbhit())
+    {
+        switch (_getch())
+        {
+        case 'w':
+            direct = up;
+            break;
+        case 's':
+            direct = down;
+            break;
+        case 'e':
+            gameOver = true;
+            break;
+        }
+    }
+}
+
+int main()
+{
+    gameSpace[playerY - 1][playerX] = '|';
+    gameSpace[playerY][playerX] = '|';
+    gameSpace[playerY + 1][playerX] = '|';
+
+    gameSpace[enemyY - 1][enemyX] = '|';
+    gameSpace[enemyY][enemyX] = '|';
+    gameSpace[enemyY + 1][enemyX] = '|';
+    
+    gameSpace[ballY][ballX] = 'o';
+    while (!gameOver)
+    {
+        control();
+        inGame();
+        map();
+    }
+}
+
+
+
